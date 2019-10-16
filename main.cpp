@@ -14,7 +14,7 @@
 
 
 bool debugFlag = false;
-cSkymax *ups = NULL;
+cInverter *ups = NULL;
 atomic_bool ups_status_changed(false);
 atomic_bool ups_qmod_changed(false);
 atomic_bool ups_qpiri_changed(false);
@@ -154,14 +154,14 @@ int main(int argc, char **argv)
   lprintf("DEBUG:  Debug set");
 
   // Get the rest of the settings from the conf file
-  if(access("./skymax.conf", F_OK) != -1) {		// file exists
-    getSettingsFile("./skymax.conf");
+  if(access("./inverter.conf", F_OK) != -1) {		// file exists
+    getSettingsFile("./inverter.conf");
   } else {						// file doesn't exist
-    getSettingsFile("/opt/skymax/bin/skymax.conf");
+    getSettingsFile("/opt/skymax/bin/inverter.conf");
   }
 
   bool ups_status_changed(false);
-  ups = new cSkymax(devicename);
+  ups = new cInverter(devicename);
   
   if (!rawcmd.empty())
   {

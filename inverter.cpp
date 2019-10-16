@@ -2,11 +2,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include "skymax.h"
+#include "inverter.h"
 #include "tools.h"
 #include "main.h"
 
-cSkymax::cSkymax(std::string devicename)
+cInverter::cInverter(std::string devicename)
 {
   device = devicename;
   status1[0] = 0;
@@ -14,7 +14,7 @@ cSkymax::cSkymax(std::string devicename)
   mode = 0;
 }
 
-string *cSkymax::GetQpigsStatus()
+string *cInverter::GetQpigsStatus()
 {
   m.lock();
   string *result = new string(status1);
@@ -22,7 +22,7 @@ string *cSkymax::GetQpigsStatus()
   return result;
 }
 
-string *cSkymax::GetQpiriStatus()
+string *cInverter::GetQpiriStatus()
 {
   m.lock();
   string *result = new string(status2);
@@ -30,7 +30,7 @@ string *cSkymax::GetQpiriStatus()
   return result;
 }
 
-void cSkymax::SetMode(char newmode)
+void cInverter::SetMode(char newmode)
 {
   m.lock();
   if (mode && newmode != mode)
@@ -39,7 +39,7 @@ void cSkymax::SetMode(char newmode)
   m.unlock();
 }
 
-int cSkymax::GetMode()
+int cInverter::GetMode()
 {
   int result;
   m.lock();
@@ -57,7 +57,7 @@ int cSkymax::GetMode()
   return result;
 }
 
-bool cSkymax::query(const char *cmd)
+bool cInverter::query(const char *cmd)
 {
   time_t started;
   int fd;
@@ -145,7 +145,7 @@ bool cSkymax::query(const char *cmd)
   return true;
 }
 
-void cSkymax::poll()
+void cInverter::poll()
 {
   int n,j;
 
@@ -188,7 +188,7 @@ void cSkymax::poll()
   }
 }
 
-void cSkymax::ExecuteCmd(const string cmd)
+void cInverter::ExecuteCmd(const string cmd)
 {
   // Sending any command raw
   if (query(cmd.data()))
@@ -199,7 +199,7 @@ void cSkymax::ExecuteCmd(const string cmd)
   }
 }
 
-uint16_t cSkymax::cal_crc_half(uint8_t *pin, uint8_t len)
+uint16_t cInverter::cal_crc_half(uint8_t *pin, uint8_t len)
 {
   uint16_t crc;
 
@@ -237,7 +237,7 @@ uint16_t cSkymax::cal_crc_half(uint8_t *pin, uint8_t len)
   return(crc);
 }
 
-bool cSkymax::CheckCRC(unsigned char *data, int len)
+bool cInverter::CheckCRC(unsigned char *data, int len)
 {
   uint16_t crc = cal_crc_half(data, len-3);
   return data[len-3]==(crc>>8) && data[len-2]==(crc&0xff);

@@ -51,7 +51,7 @@
   
   int print_help()
   {
-    printf("USAGE:  skymax [-r <raw command>] | [-h | --help]\n\n");
+    printf("USAGE:  inverter [-r <raw command>] | [-h | --help]\n\n");
     printf("RAW COMMAND EXAMPLES (see protocol manual for complete list):\n");
     printf("Set output source priority  POP00     (Utility first)\n");
     printf("                            POP01     (Solar first)\n");

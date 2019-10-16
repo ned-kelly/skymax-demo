@@ -15,8 +15,8 @@ compilation / running
 Sample build/compilation procedure:
 $ git clone https://github.com/nrm21/skymax-demo
 $ cd skymax-demo
-$ mkdir out
-$ cd out
+$ mkdir test
+$ cd test
 $ cmake ..
 $ make
 
@@ -24,7 +24,7 @@ Then you need to get the real hidraw device name (probably hidraw0):
 $ dmesg | grep hidraw
 
 and then run the program like this (assuming it is located in '/opt/skymax/out' dir):
-$ /opt/skymax/out/skymax
+$ /opt/skymax/test/inverter
 
 The program will run once, it will spit out values it receives from the inverter in
 JSON format and exits.  It was intended to be run by telegraf using the exec plugin
@@ -33,10 +33,10 @@ where it can be easily graphed by grafana (or some other "TIG or TICK stack"-lik
 software suite).
 
 The program can also be made to send raw commands to the inverter if you choose:
-$ /opt/skymax/out/skymax -r POP00   # set utility output mode
-$ /opt/skymax/out/skymax -r POP02   # set SBU output mode
-$ /opt/skymax/out/skymax -r PCP00   # set utility charging mode
-$ /opt/skymax/out/skymax -r PCP03   # set solar only charging mode
+$ /opt/skymax/test/inverter -r POP00   # set utility output mode
+$ /opt/skymax/test/inverter -r POP02   # set SBU output mode
+$ /opt/skymax/test/inverter -r PCP00   # set utility charging mode
+$ /opt/skymax/test/inverter -r PCP03   # set solar only charging mode
 etc...
 
 These commands can of course be scripted and put into a cron job to run them at a

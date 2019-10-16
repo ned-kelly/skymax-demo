@@ -2,7 +2,7 @@
 #define ___MAIN_H
 
 #include <atomic>
-#include "skymax.h"
+#include "inverter.h"
 
 extern bool debugFlag;
 extern atomic_bool ups_status_changed;

@@ -1,12 +1,12 @@
-#ifndef ___SKYMAX_H
-#define ___SKYMAX_H
+#ifndef ___INVERTER_H
+#define ___INVERTER_H
 
 #include <thread>
 #include <mutex>
 
 using namespace std;
 
-class cSkymax
+class cInverter
 {
   unsigned char buf[1024]; //internal work buffer
   char status1[1024];
@@ -20,11 +20,11 @@ class cSkymax
   uint16_t cal_crc_half(uint8_t *pin, uint8_t len);
 
 public:
-  cSkymax(std::string devicename);
+  cInverter(std::string devicename);
   void poll();
   void runMultiThread()
   {
-    std::thread t1(&cSkymax::poll, this);
+    std::thread t1(&cInverter::poll, this);
     t1.detach();
   }
   string *GetQpiriStatus();
@@ -33,4 +33,4 @@ public:
   void ExecuteCmd(const std::string cmd);
 };
 
-#endif // ___SKYMAX_H
+#endif // ___INVERTER_H
