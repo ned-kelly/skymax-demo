@@ -151,10 +151,10 @@ int main(int argc, char **argv)
   {
     debugFlag = true;
   }
-  lprintf("SKYMAX:  Debug set");
+  lprintf("DEBUG:  Debug set");
 
   // Get the rest of the settings from the conf file
-  if( access( "./skymax.conf", F_OK ) != -1 ) {		// file exists
+  if(access("./skymax.conf", F_OK) != -1) {		// file exists
     getSettingsFile("./skymax.conf");
   } else {						// file doesn't exist
     getSettingsFile("/opt/skymax/bin/skymax.conf");
@@ -175,13 +175,13 @@ int main(int argc, char **argv)
     
     while (true)
     {
-      lprintf("SKYMAX:  Start loop");
+      lprintf("DEBUG:  Start loop");
       // If inverter mode changes print it to screen
       if (ups_status_changed)
       {
         int mode = ups->GetMode();
         if (mode)
-          lprintf("SKYMAX: %d", mode);
+          lprintf("DEBUG: %d", mode);
         ups_status_changed = false;
       }
       
@@ -204,11 +204,10 @@ int main(int argc, char **argv)
           // There appears to be a discrepancy in actual DMM measured current vs what the meter is
           // telling me it's getting, so lets add a variable we can multiply/divide by to adjust if
           // needed.  This should be set in the config so it can be changed without program recompile.
-	  if (debugFlag) {
-            printf("SKYMAX: ampfactor from config is %.2f\n", ampfactor);
-            printf("SKYMAX: wattfactor from config is %.2f\n", wattfactor);
-	  }
+          lprintf("DEBUG: ampfactor from config is %.2f", ampfactor);
+          lprintf("DEBUG: wattfactor from config is %.2f", wattfactor);
           pv_input_current = pv_input_current * ampfactor;
+
           // It appears on further inspection of the documentation, that the input current is actually
           // current that is going out to the battery at battery voltage (NOT at PV voltage).  This
           // would explain the larger discrepancy we saw before.
@@ -261,7 +260,7 @@ int main(int argc, char **argv)
           delete reply2;
   
           // Do once and exit instead of loop endlessly
-          lprintf("SKYMAX:  All queries complete, exiting using goto");
+          lprintf("DEBUG:  All queries complete, exiting using goto");
           break;
         }
       }

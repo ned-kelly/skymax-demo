@@ -66,7 +66,7 @@ bool cSkymax::query(const char *cmd)
   fd = open(this->device.data(), O_RDWR | O_NONBLOCK);  // device is provided by program arg (usually /dev/hidraw0)
   if (fd == -1)
   {
-    lprintf("Skymax:  Unable to open device file (errno=%d %s)", errno, strerror(errno));
+    lprintf("DEBUG:  Unable to open device file (errno=%d %s)", errno, strerror(errno));
     sleep(10);
     return false;
   }
@@ -75,10 +75,22 @@ bool cSkymax::query(const char *cmd)
   uint16_t crc = cal_crc_half((uint8_t*)cmd, strlen(cmd));
   n = strlen(cmd);
   memcpy(&buf, cmd, n);
-  lprintf("SKYMAX:  Current CRC: %X %X", crc >> 8, crc & 0xff);
+  lprintf("DEBUG:  Current CRC: %X %X", crc >> 8, crc & 0xff);
   buf[n++] = crc >> 8;
   buf[n++] = crc & 0xff;
   buf[n++] = 0x0d;
+
+  // Send buffer in hex
+  char messagestart[128];
+  char* messageptr = messagestart;
+  sprintf(messagestart, "DEBUG:  Send buffer hex bytes:  ( ");
+  messageptr += strlen(messagestart);
+
+  for (int j = 0; j < n; j++) {
+    int size = sprintf(messageptr, "%02x ", buf[j]);
+    messageptr += 3;
+  }
+  lprintf("%s)", messagestart);
 
   // Send a command
   write(fd, &buf, n);
@@ -96,7 +108,7 @@ bool cSkymax::query(const char *cmd)
     {
       if (time(NULL) - started > 8)     // Wait 8 secs before timeout
       {
-        lprintf("SKYMAX:  %s read timeout", cmd);
+        lprintf("DEBUG:  %s read timeout", cmd);
         break;
       }
       else
@@ -109,27 +121,27 @@ bool cSkymax::query(const char *cmd)
 
     startbuf = (char *)&buf[0];
     endbuf = strchr(startbuf, '\r');
-    //lprintf("SKYMAX:  %s Current buffer: %s", cmd, startbuf);
+    //lprintf("DEBUG:  %s Current buffer: %s", cmd, startbuf);
   } while (endbuf == NULL);     // Still haven't found end <cr> char as long as pointer is null
   close(fd);
 
   int replysize = endbuf - startbuf + 1;
-  lprintf("SKYMAX:  Found <cr> at byte: %d", replysize);
+  lprintf("DEBUG:  Found reply <cr> at byte: %d", replysize);
 
   if (buf[0]!='(' || buf[replysize-1]!=0x0d)
   {
-    lprintf("SKYMAX:  %s: incorrect start/stop bytes.  Buffer: %s", cmd, buf);
+    lprintf("DEBUG:  %s: incorrect buffer start/stop bytes.  Buffer: %s", cmd, buf);
     return false;
   }
   if (!(CheckCRC(buf, replysize)))
   {
-    lprintf("SKYMAX:  %s: CRC Failed!  Reply size: %d  Buffer: %s", cmd, replysize, buf);
+    lprintf("DEBUG:  %s: CRC Failed!  Reply size: %d  Buffer: %s", cmd, replysize, buf);
     return false;
   }
   buf[replysize-3] = '\0';      // Null-terminating on first CRC byte
-  lprintf("SKYMAX:  %s: %d bytes read: %s", cmd, i, buf);
+  lprintf("DEBUG:  %s: %d bytes read: %s", cmd, i, buf);
   
-  lprintf("SKYMAX:  %s query finished", cmd);
+  lprintf("DEBUG:  %s query finished", cmd);
   return true;
 }
 

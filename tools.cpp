@@ -24,12 +24,12 @@
       struct tm *timeinfo;
       time(&rawtime);
       timeinfo = localtime(&rawtime);
-      char buf[256];
-      strcpy(buf, asctime(timeinfo));
-      buf[strlen(buf)-1] = 0;
+      char timestamp[256];
+      strcpy(timestamp, asctime(timeinfo));
+      timestamp[strlen(timestamp)-1] = 0;
 
       //connect with args
-      snprintf(fmt, sizeof(fmt), "%s %s\n", buf, format);
+      snprintf(fmt, sizeof(fmt), "%s %s\n", timestamp, format);
 
       //put on screen:
       va_start(ap, format);
