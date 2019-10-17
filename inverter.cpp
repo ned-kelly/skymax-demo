@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <string.h>
@@ -92,8 +93,34 @@ bool cInverter::query(const char *cmd)
   }
   lprintf("%s)", messagestart);
 
+  // The below is a blocking function and tends to have a long delay if you put
+  // in a command that takes more than 5 chars (+ 3 bytes of <CRC><CRC><CR>).
+  // I'm still not sure why.
+
   // Send a command
-  write(fd, &buf, n);
+  if (n > 7)
+  {
+    int bytes_sent = 0;
+    int remaining = n;
+    while (remaining > 0)
+    {
+      ssize_t written = write(fd, &buf + bytes_sent, 8);
+      if (written < 0)
+      {
+        lprintf("DEBUG:  Write command failed, error number %d was returned", errno);
+      }
+      else
+      {
+        lprintf("DEBUG:  %d bytes written, %d bytes sent, %d bytes remaining", written, bytes_sent, remaining);
+      }
+      bytes_sent += written;
+      remaining -= written;
+    }
+  }
+  else
+  {
+    write(fd, &buf, n);
+  }
   time(&started);
 
   // Instead of using a fixed size for expected response length, lets find it
@@ -113,7 +140,7 @@ bool cInverter::query(const char *cmd)
       }
       else
       {
-        usleep(10);
+        usleep(50000);  // sleep 50ms
         continue;
       }
     }
@@ -121,6 +148,7 @@ bool cInverter::query(const char *cmd)
 
     startbuf = (char *)&buf[0];
     endbuf = strchr(startbuf, '\r');
+
     //lprintf("DEBUG:  %s Current buffer: %s", cmd, startbuf);
   } while (endbuf == NULL);     // Still haven't found end <cr> char as long as pointer is null
   close(fd);
