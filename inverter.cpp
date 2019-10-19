@@ -98,15 +98,17 @@ bool cInverter::query(const char *cmd)
      Unfortunately, splitting up the data chucks and sending seperately doesn't
      seem to work either. */
 
-  // Send the command
-  if (n > 7)
+  // Send the command (or part of the command if longer than chunk_size)
+  int chunk_size = 8;
+  if (n > chunk_size - 1)
   {
     int bytes_sent = 0;
     int remaining = n;
     while (remaining > 0)
     {
-      ssize_t written = write(fd, &buf + bytes_sent, 8);
-      usleep(50000);   // Sleep 50ms before sending another bit of info
+      ssize_t written = write(fd, &buf + bytes_sent, chunk_size);
+      usleep(250000);   // Sleep 250ms before sending another bit of info
+
       if (written < 0)
       {
         lprintf("DEBUG:  Write command failed, error number %d was returned", errno);
@@ -142,7 +144,7 @@ bool cInverter::query(const char *cmd)
       }
       else
       {
-        usleep(50000);  // sleep 50ms
+        usleep(250000);  // sleep 250ms
         continue;
       }
     }
