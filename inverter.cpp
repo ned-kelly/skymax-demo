@@ -93,11 +93,12 @@ bool cInverter::query(const char *cmd)
   }
   lprintf("%s)", messagestart);
 
-  // The below is a blocking function and tends to have a long delay if you put
-  // in a command that takes more than 5 chars (+ 3 bytes of <CRC><CRC><CR>).
-  // I'm still not sure why.
+  /* The below command doesn't take more than an 8-byte payload 5 chars (+ 3
+     bytes of <CRC><CRC><CR>).  It has to do with low speed USB specifications.
+     Unfortunately, splitting up the data chucks and sending seperately doesn't
+     seem to work either. */
 
-  // Send a command
+  // Send the command
   if (n > 7)
   {
     int bytes_sent = 0;
@@ -105,6 +106,7 @@ bool cInverter::query(const char *cmd)
     while (remaining > 0)
     {
       ssize_t written = write(fd, &buf + bytes_sent, 8);
+      usleep(50000);   // Sleep 50ms before sending another bit of info
       if (written < 0)
       {
         lprintf("DEBUG:  Write command failed, error number %d was returned", errno);
