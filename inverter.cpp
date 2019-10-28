@@ -95,35 +95,30 @@ bool cInverter::query(const char *cmd)
 
   /* The below command doesn't take more than an 8-byte payload 5 chars (+ 3
      bytes of <CRC><CRC><CR>).  It has to do with low speed USB specifications.
-     Unfortunately, splitting up the data chucks and sending seperately doesn't
-     seem to work either. */
+     Unfortunately, splitting up the data chucks only seems to work sometimes. */
 
   // Send the command (or part of the command if longer than chunk_size)
   int chunk_size = 8;
-  if (n > chunk_size - 1)
-  {
-    int bytes_sent = 0;
-    int remaining = n;
-    while (remaining > 0)
-    {
-      ssize_t written = write(fd, &buf + bytes_sent, chunk_size);
-      usleep(250000);   // Sleep 250ms before sending another bit of info
+  if (n < chunk_size) // Send in chunks of 8 bytes, if less than 8 bytes to send... just send that
+    chunk_size = n;
+  int bytes_sent = 0;
+  int remaining = n;
 
-      if (written < 0)
-      {
-        lprintf("DEBUG:  Write command failed, error number %d was returned", errno);
-      }
-      else
-      {
-        lprintf("DEBUG:  %d bytes written, %d bytes sent, %d bytes remaining", written, bytes_sent, remaining);
-      }
-      bytes_sent += written;
-      remaining -= written;
-    }
-  }
-  else
+  while (remaining > 0)
   {
-    write(fd, &buf, n);
+    ssize_t written = write(fd, &buf + bytes_sent, chunk_size);
+    bytes_sent += written;
+    if (remaining - written >= 0)
+      remaining -= written;
+    else
+      remaining = 0;
+
+    if (written < 0)
+      lprintf("DEBUG:  Write command failed, error number %d was returned", errno);
+    else
+      lprintf("DEBUG:  %d bytes written, %d bytes sent, %d bytes remaining", written, bytes_sent, remaining);
+
+    usleep(250000);   // Sleep 250ms before sending another 8 bytes of info
   }
   time(&started);
 
