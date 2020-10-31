@@ -106,7 +106,7 @@ bool cInverter::query(const char *cmd)
 
   while (remaining > 0)
   {
-    ssize_t written = write(fd, &buf + bytes_sent, chunk_size);
+    ssize_t written = write(fd, &buf[bytes_sent], chunk_size);
     bytes_sent += written;
     if (remaining - written >= 0)
       remaining -= written;
@@ -118,8 +118,10 @@ bool cInverter::query(const char *cmd)
     else
       lprintf("DEBUG:  %d bytes written, %d bytes sent, %d bytes remaining", written, bytes_sent, remaining);
 
+    chunk_size = remaining;
     usleep(250000);   // Sleep 250ms before sending another 8 bytes of info
   }
+
   time(&started);
 
   // Instead of using a fixed size for expected response length, lets find it
