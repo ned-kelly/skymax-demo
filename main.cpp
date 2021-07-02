@@ -26,47 +26,37 @@ float ampfactor;
 float wattfactor;
 
 
-void attemptAddSetting(int *addTo, string addFrom)
-{
-  try
-  {
+void attemptAddSetting(int *addTo, string addFrom) {
+  try {
     *addTo = stof(addFrom);
   }
-  catch (exception e)
-  {
+  catch (exception e) {
     cout << e.what() << '\n';
     cout << "There's probably a string in the settings file where an int should be.\n";
   }
 }
 
 
-void attemptAddSetting(float *addTo, string addFrom)
-{
-  try
-  {
+void attemptAddSetting(float *addTo, string addFrom) {
+  try {
     *addTo = stof(addFrom);
   }
-  catch (exception e)
-  {
+  catch (exception e) {
     cout << e.what() << '\n';
     cout << "There's probably a string in the settings file where a floating point should be.\n";
   }
 }
 
 
-void getSettingsFile(string filename)
-{
-  try
-  {
+void getSettingsFile(string filename) {
+  try {
     string fileline, linepart1, linepart2;
     ifstream infile;
     infile.open(filename);
-    while(!infile.eof())
-    {
+    while(!infile.eof()) {
       getline(infile, fileline);
       size_t firstpos = fileline.find("#");
-      if(firstpos != 0 && fileline.length() != 0)    // Ignore lines starting with # (comment lines)
-      {
+      if(firstpos != 0 && fileline.length() != 0) {    // Ignore lines starting with # (comment lines)
         size_t delimiter = fileline.find("=");
         linepart1 = fileline.substr(0, delimiter);
         linepart2 = fileline.substr(delimiter+1, string::npos - delimiter);
@@ -85,15 +75,13 @@ void getSettingsFile(string filename)
     }
     infile.close();
   }
-  catch (...)
-  {
+  catch (...) {
       cout << "Settings could not be read properly...\n";
   }
 }
 
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   // Reply1
   float voltage_grid;
   float freq_grid;
@@ -143,12 +131,10 @@ int main(int argc, char **argv)
   // Get command flag settings from the arguments (if any)
   InputParser cmdArgs(argc, argv);
   const string &rawcmd = cmdArgs.getCmdOption("-r");
-  if(cmdArgs.cmdOptionExists("-h") || cmdArgs.cmdOptionExists("--help"))
-  {
+  if(cmdArgs.cmdOptionExists("-h") || cmdArgs.cmdOptionExists("--help")) {
     return print_help();
   }
-  if(cmdArgs.cmdOptionExists("-d"))
-  {
+  if(cmdArgs.cmdOptionExists("-d")) {
     debugFlag = true;
   }
   lprintf("DEBUG:  Debug set");
@@ -163,22 +149,18 @@ int main(int argc, char **argv)
   bool ups_status_changed(false);
   ups = new cInverter(devicename);
   
-  if (!rawcmd.empty())
-  {
+  if (!rawcmd.empty()) {
       ups->ExecuteCmd(rawcmd);
       // We can piggyback on either GetStatus() function to return our result, it doesn't matter which
       printf("Reply:  %s\n", ups->GetQpiriStatus()->c_str());
   }
-  else  // No command being sent so just run normally
-  {
+  else {  // No command being sent so just run normally
     ups->runMultiThread();
     
-    while (true)
-    {
+    while (true) {
       lprintf("DEBUG:  Start loop");
       // If inverter mode changes print it to screen
-      if (ups_status_changed)
-      {
+      if (ups_status_changed) {
         int mode = ups->GetMode();
         if (mode)
           lprintf("DEBUG: %d", mode);
@@ -186,8 +168,7 @@ int main(int argc, char **argv)
       }
       
       // Once we receive all queries print it to screen
-      if (ups_qmod_changed && ups_qpiri_changed && ups_qpigs_changed)
-      {
+      if (ups_qmod_changed && ups_qpiri_changed && ups_qpigs_changed) {
         ups_qmod_changed = false;
         ups_qpiri_changed = false;
         ups_qpigs_changed = false;
@@ -195,8 +176,7 @@ int main(int argc, char **argv)
         int mode = ups->GetMode();
         string *reply1 = ups->GetQpigsStatus();
         string *reply2 = ups->GetQpiriStatus();
-        if (reply1 && reply2)
-        {
+        if (reply1 && reply2) {
           // Parse and display values
           sscanf(reply1->c_str(), "%f %f %f %f %d %d %d %d %f %d %d %d %f %f %f %d %s", &voltage_grid, &freq_grid, &voltage_out, &freq_out, &load_va, &load_watt, &load_percent, &voltage_bus, &voltage_batt, &batt_charge_current, &batt_capacity, &temp_heatsink, &pv_input_current, &pv_input_voltage, &scc_voltage, &batt_discharge_current, &device_status);
           sscanf(reply2->c_str(), "%f %f %f %f %f %d %d %f %f %f %f %f %d %d %d %d %d %d - %d %d %d %f", &grid_voltage_rating, &grid_current_rating, &out_voltage_rating, &out_freq_rating, &out_current_rating, &out_va_rating, &out_watt_rating, &batt_rating, &batt_recharge_voltage, &batt_under_voltage, &batt_bulk_voltage, &batt_float_voltage, &batt_type, &max_grid_charge_current, &max_charge_current, &in_voltage_range, &out_source_priority, &charger_source_priority, &machine_type, &topology, &out_mode, &batt_redischarge_voltage);
