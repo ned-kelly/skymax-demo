@@ -87,7 +87,7 @@ bool cInverter::query(const char *cmd) {
 
   /* The below command doesn't take more than an 8-byte payload 5 chars (+ 3
      bytes of <CRC><CRC><CR>).  It has to do with low speed USB specifications.
-     Unfortunately, splitting up the data chucks only seems to work sometimes. */
+     So we much chunk up the data and send it in a loop 8 bytes at a time.  */
 
   // Send the command (or part of the command if longer than chunk_size)
   int chunk_size = 8;
